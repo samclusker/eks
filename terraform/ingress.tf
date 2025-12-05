@@ -9,6 +9,27 @@ resource "aws_route53_zone" "main" {
   })
 }
 
+resource "aws_route53domains_registered_domain" "main" {
+  count = var.create_dns_zone && var.is_aws_registered_domain ? 1 : 0
+
+  provider = aws.route53domains
+
+  domain_name = var.dns_zone_name
+
+  name_server {
+    name = aws_route53_zone.main[0].name_servers[0]
+  }
+  name_server {
+    name = aws_route53_zone.main[0].name_servers[1]
+  }
+  name_server {
+    name = aws_route53_zone.main[0].name_servers[2]
+  }
+  name_server {
+    name = aws_route53_zone.main[0].name_servers[3]
+  }
+}
+
 # AWS Certificate Manager certificate
 resource "aws_acm_certificate" "main" {
   count = var.create_dns_zone ? 1 : 0

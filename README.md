@@ -7,10 +7,10 @@ Terraform IaC to deploy an AWS EKS cluster with Karpenter autoscaling and ingres
 - ✅ **Multi-AZ VPC**: Public, private, and intra subnets with NAT gateway and VPC Flow Logs
 - ✅ **EKS Cluster**: Managed Kubernetes cluster with public and private endpoints
 - ✅ **Karpenter Autoscaling**: Node autoscaler with automatic provisioning (Linux/amd64, Nitro instances)
-- ✅ **EKS Addons**: VPC CNI, CoreDNS, kube-proxy, EBS CSI Driver, Snapshot Controller, Pod Identity Agent
+- ✅ **EKS Addons**: VPC CNI, CoreDNS, kube-proxy, EBS CSI Driver, Snapshot Controller, Pod Identity Agent and Secrets Manager
 - ✅ **Ingress Support**: AWS Load Balancer Controller (ALB/NLB) with optional Route53 and ACM certificate
 - ✅ **DNS Management**: Optional External-DNS for automatic Route53 record management
-- ✅ **Security**: Pod Identity, IRSA, security groups, VPC Flow Logs, Bottlerocket AMI
+- ✅ **Security**: IRSA, security groups, VPC Flow Logs, Bottlerocket AMI
 
 ## Prerequisites
 
@@ -37,7 +37,8 @@ primary_max_size     = 3
 primary_desired_size = 2
 
 create_dns_zone = false # Optional
-dns_zone_name = "<dns_zone>"
+dns_zone_name = "<dns_zone>" # Optional
+is_aws_registered_domain = false # Optional
 ```
 
 ### 2. Deploy Infrastructure
@@ -57,10 +58,19 @@ terraform apply -var-file=terraform.prod.tfvars
 
 ### 3. Configure kubectl
 
+Inspect outputs given by Terraform on successful apply:
+
 ```bash
-# Get cluster name from Terraform output
-CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "eks-task-production")
-REGION=$(terraform output -raw region 2>/dev/null || grep region terraform.prod.tfvars | cut -d'"' -f2)
+cluster_certificate_authority_data = "..."
+cluster_endpoint = "..."
+cluster_name = "eks-task-production"
+cluster_security_group_id = "..."
+karpenter_queue_name = "..."
+kubectl_config_command = "aws eks update-kubeconfig --region eu-north-1 --name eks-task-production" # <--
+node_security_group_id = "..."
+oidc_provider_arn = "..."
+region = "eu-north-1"
+vpc_id = "..."
 
 # Configure kubectl
 aws eks update-kubeconfig --region $REGION --name $CLUSTER_NAME
@@ -76,8 +86,6 @@ kubectl cluster-info
 
 # Verify nodes
 kubectl get nodes -o wide
-
-# Expected: Should see 2 nodes from managed node group
 ```
 
 ### 2. Verify Addons
@@ -97,6 +105,14 @@ kubectl get pods -n kube-system | grep -E "ebs-csi|coredns|vpc-cni|kube-proxy|po
 # - eks-pod-identity-agent-* (DaemonSet, 1 per node)
 # - aws-load-balancer-controller-* (1/1 ready)
 # - external-dns-* (1/1 ready, if DNS zone created)
+
+# Verify snapshot addon
+kubectl get pods -n aws-secrets-manager
+
+# Expected output should show:
+
+# aws-secrets-store-csi-driver-provider-*
+# secrets-store-csi-driver-*
 ```
 
 ### 3. Verify Karpenter
@@ -200,17 +216,19 @@ aws ec2 describe-subnets \
 
 ### Key Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `region` | AWS region | `eu-north-1` |
-| `environment` | Environment (dev/staging/production) | `production` |
-| `kubernetes_version` | Kubernetes version | `1.34` |
-| `instance_types` | Managed node group instance types | `["t3.medium", "t3.large"]` |
-| `primary_min_size` | Minimum nodes in managed group | `1` |
-| `primary_max_size` | Maximum nodes in managed group | `2` |
-| `primary_desired_size` | Desired nodes in managed group | `1` |
-| `create_dns_zone` | Creates Route53 hosted zone, ACM certificate, and External-DNS | `false` |
-| `dns_zone_name` | Domain name for Route53 zone (e.g., example.com). Required if `create_dns_zone = true` | `""` |
+| Variable                   | Description                                                                            | Default                     |
+|----------------------------|----------------------------------------------------------------------------------------|-----------------------------|
+|                   `region` |                                                                             AWS region |                `eu-north-1` |
+|              `environment` |                                                   Environment (dev/staging/production) |                `production` |
+|       `kubernetes_version` |                                                                     Kubernetes version |                      `1.34` |
+|           `instance_types` |                                                      Managed node group instance types | `["t3.medium", "t3.large"]` |
+|         `primary_min_size` |                                                         Minimum nodes in managed group |                         `1` |
+|         `primary_max_size` |                                                         Maximum nodes in managed group |                         `2` |
+|     `primary_desired_size` |                                                         Desired nodes in managed group |                         `1` |
+|          `create_dns_zone` |                         Creates Route53 hosted zone, ACM certificate, and External-DNS |                     `false` |
+| `is_aws_registered_domain` |                                  Confirm whether your domain is registered in Route 53 |                     `false` |
+|            `dns_zone_name` | Domain name for Route53 zone (e.g., example.com). Required if `create_dns_zone = true` |                        `""` |
+|
 
 ### Cluster Naming
 

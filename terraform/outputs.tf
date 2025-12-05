@@ -25,6 +25,16 @@ output "cluster_security_group_id" {
   value       = module.eks.cluster_security_group_id
 }
 
+output "oidc_provider_arn" {
+  description = "OIDC provider ARN for the cluster"
+  value       = module.eks.oidc_provider_arn
+}
+
+output "cluster_certificate_authority_data" {
+  description = "Base64 encoded cluster certificate authority data"
+  value       = module.eks.cluster_certificate_authority_data
+}
+
 output "node_security_group_id" {
   description = "Security group ID attached to the EKS nodes"
   value       = module.eks.node_security_group_id

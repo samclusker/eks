@@ -35,6 +35,19 @@ module "eks" {
       most_recent              = true
       service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
     }
+
+    aws-secrets-store-csi-driver-provider = {
+      most_recent = true
+      configuration_values = jsonencode({
+        "secrets-store-csi-driver" = {
+          syncSecret = {
+            enabled = true
+          }
+          enableSecretRotation = true
+          rotationPollInterval = "15s"
+        }
+      })
+    }
   }
 
   eks_managed_node_groups = {

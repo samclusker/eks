@@ -50,6 +50,12 @@ variable "create_dns_zone" {
   default     = false
 }
 
+variable "is_aws_registered_domain" {
+  description = "Whether the domain is registered with AWS"
+  type        = bool
+  default     = false
+}
+
 variable "dns_zone_name" {
   description = "Domain name for the Route53 hosted zone (e.g., example.com). Required if create_dns_zone is true."
   type        = string
