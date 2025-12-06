@@ -32,7 +32,7 @@ jobs:
 
     - name: Terraform Lint
       id: lint
-      run: terraform fmt -check
+      run: terraform fmt -check -recursive terraform/
 
     - run: echo ${{ steps.lint.outputs.stdout }}
     - run: echo ${{ steps.lint.outputs.stderr }}
@@ -40,7 +40,7 @@ jobs:
 
     - name: Terraform Plan
       id: plan
-      run: terraform plan -input=false -no-color
+      run: terraform -chdir=terraform plan -input=false -no-color -var-file=terraform/terraform.test.tfvars
 
     - run: echo ${{ steps.plan.outputs.stdout }}
     - run: echo ${{ steps.plan.outputs.stderr }}

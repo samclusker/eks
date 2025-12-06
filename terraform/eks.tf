@@ -1,7 +1,6 @@
 # EKS Cluster Module
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.9.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=c41b582"
 
   name               = local.name
   kubernetes_version = var.kubernetes_version
@@ -28,12 +27,12 @@ module "eks" {
     # persistent volumes
     aws-ebs-csi-driver = {
       most_recent              = true
-      service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
+      service_account_role_arn = module.ebs_csi_irsa.arn
     }
     # volumesnapshots
     snapshot-controller = {
       most_recent              = true
-      service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
+      service_account_role_arn = module.ebs_csi_irsa.arn
     }
 
     aws-secrets-store-csi-driver-provider = {
@@ -75,10 +74,9 @@ module "eks" {
 }
 
 module "ebs_csi_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.28"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-role-for-service-accounts?ref=7279fc4"
 
-  role_name_prefix = "${local.name}-ebs-csi-"
+  name = "${local.name}-ebs-csi"
 
   attach_ebs_csi_policy = true
 
@@ -92,10 +90,9 @@ module "ebs_csi_irsa" {
 
 # AWS Load Balancer Controller IAM Role
 module "aws_load_balancer_controller_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.28"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-role-for-service-accounts?ref=7279fc4"
 
-  role_name_prefix = "${local.name}-aws-lb-controller-"
+  name = "${local.name}-aws-lb-controller"
 
   attach_load_balancer_controller_policy = true
 
@@ -113,12 +110,14 @@ module "aws_load_balancer_controller_irsa" {
 module "external_dns_irsa" {
   count = var.create_dns_zone ? 1 : 0
 
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.28"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-role-for-service-accounts?ref=7279fc4"
 
-  role_name_prefix = "${local.name}-external-dns-"
+  name = "${local.name}-external-dns"
 
   attach_external_dns_policy = true
+  external_dns_hosted_zone_arns = [
+    "arn:aws:route53:::hostedzone/${aws_route53_zone.main[0].zone_id}"
+  ]
 
   oidc_providers = {
     main = {
