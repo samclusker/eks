@@ -2,9 +2,7 @@ name: 'Checkov'
 
 on:
   push:
-    branches: [ $default-branch, 'github-actions' ]
   pull_request:
-    branches: [ $default-branch ]
 
   workflow_dispatch:
 
