@@ -32,11 +32,7 @@ jobs:
 
     - name: Terraform Lint
       id: lint
-      run: terraform -chdir=terraform fmt -check -recursive terraform/
-
-    - run: echo ${{ steps.lint.outputs.stdout }}
-    - run: echo ${{ steps.lint.outputs.stderr }}
-    - run: echo ${{ steps.lint.outputs.exitcode }}
+      run: terraform fmt -check -recursive terraform/
 
     - name: Terraform Plan
       id: plan
