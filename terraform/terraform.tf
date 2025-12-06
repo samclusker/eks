@@ -34,7 +34,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias  = "route53domains"
+  alias  = "us-east-1"
   region = "us-east-1"
 }
 
@@ -44,7 +44,7 @@ provider "kubectl" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
   }
   load_config_file = false
 }

@@ -1,6 +1,5 @@
 module "karpenter" {
-  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "~> 21.9.0"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/karpenter?ref=c41b582"
 
   cluster_name = module.eks.cluster_name
   namespace    = "kube-system"
@@ -20,14 +19,14 @@ module "karpenter" {
 
 # Install Karpenter
 resource "helm_release" "karpenter" {
-  namespace           = "kube-system"
-  name                = "karpenter"
-  create_namespace    = true
-  repository          = "oci://public.ecr.aws/karpenter"
-  chart               = "karpenter"
-  version             = "1.8.2"
-  wait                = true
-  timeout             = 600
+  namespace        = "kube-system"
+  name             = "karpenter"
+  create_namespace = true
+  repository       = "oci://public.ecr.aws/karpenter"
+  chart            = "karpenter"
+  version          = "1.8.2"
+  wait             = true
+  timeout          = 600
 
   values = [
     <<-EOT
