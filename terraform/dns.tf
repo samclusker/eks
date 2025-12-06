@@ -1,5 +1,4 @@
 # Optional Route53 Hosted Zone for Kubernetes Ingress
-# checkov:skip=CKV2_AWS_39: "Not a requirmement for logging at this time"
 resource "aws_route53_zone" "main" {
   count = var.create_dns_zone ? 1 : 0
 

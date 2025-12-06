@@ -27,6 +27,9 @@ jobs:
       with:
         terraform_version: 1.13.0
 
+    - name: Change directory
+      run: cd terraform
+
     - name: Terraform Init
       run: terraform init
 
@@ -40,7 +43,7 @@ jobs:
 
     - name: Terraform Plan
       id: plan
-      run: terraform -chdir=terraform plan -input=false -no-color -var-file=../test/terraform.test.tfvars
+      run: terraform plan -input=false -no-color -var-file=../test/terraform.test.tfvars
 
     - run: echo ${{ steps.plan.outputs.stdout }}
     - run: echo ${{ steps.plan.outputs.stderr }}
