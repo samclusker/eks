@@ -7,7 +7,16 @@ Terraform IaC to deploy an AWS EKS cluster with Karpenter autoscaling and ingres
 - ✅ **Multi-AZ VPC**: Public, private, and intra subnets with NAT gateway and VPC Flow Logs
 - ✅ **EKS Cluster**: Managed Kubernetes cluster with public and private endpoints
 - ✅ **Karpenter Autoscaling**: Node autoscaler with automatic provisioning (Linux/amd64, Nitro instances)
-- ✅ **EKS Addons**: VPC CNI, CoreDNS, kube-proxy, EBS CSI Driver, Snapshot Controller, Pod Identity Agent and Secrets Manager
+- ✅ **EKS Addons**:
+  - VPC CNI
+  - CoreDNS
+  - kube-proxy
+  - EBS CSI Driver
+  - Snapshot Controller
+  - Pod Identity Agent
+  - Secrets Manager
+  - metrics-server
+  - kube-state-metrics
 - ✅ **Ingress Support**: AWS Load Balancer Controller (ALB/NLB) with optional Route53 and ACM certificate
 - ✅ **DNS Management**: Optional External-DNS for automatic Route53 record management
 - ✅ **Security**: IRSA, security groups, VPC Flow Logs, Bottlerocket AMI
