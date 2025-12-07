@@ -47,6 +47,14 @@ module "eks" {
         }
       })
     }
+
+    kube-state-metrics = {
+      most_recent = true
+    }
+
+    metrics-server = {
+      most_recent = true
+    }
   }
 
   eks_managed_node_groups = {
